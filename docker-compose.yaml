@@ -1,0 +1,73 @@
+version: "3"
+networks:
+  cicd:
+    driver: bridge
+services:
+  jenkins:
+    build:
+      context: ./jenkins
+    container_name: jenkins
+    hostname: jenkins
+    user: root
+    networks:
+      - cicd
+    ports:
+      - 8080:8080
+      - "50000:50000"
+      - "50022:50022"
+    environment:
+      UID_JENKINS: 1000
+      GID_JENKINS: 1000
+      JENKINS_OPTS: "--prefix=/jenkins"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - ./jenkins/storage/data:/var/jenkins_home
+      - ./jenkins/storage/artifacts:/var/jenkins_artifacts
+      - ./jenkins/storage/.ssh:/root/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    hostname: sonarqube
+    networks:
+      - cicd
+    depends_on:
+      - db
+    environment:
+      - SONARQUBE_JDBC_USERNAME=sonar
+      - SONARQUBE_JDBC_PASSWORD=sonar
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://db:5432/sonar
+    ports:
+      - "9000:9000"
+      - "9092:9092"
+    volumes:
+      - ./sonarqube/conf:/opt/sonarqube/conf
+      - ./sonarqube/data:/opt/sonarqube/data
+      - ./sonarqube/extensions:/opt/sonarqube/extensions
+      - ./sonarqube/plugins:/opt/sonarqube/lib/bundled-plugins
+      - ./sonarqube/logs:/opt/sonarqube/logs
+
+  db:
+    image: postgres
+    container_name: postgresql
+    networks:
+      - cicd
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    volumes:
+      # - postgresql:/var/lib/postgresql
+      - ./postgresql/data:/var/lib/postgresql/data
+
+  # volumes:
+  #   # sonarqube_data:
+  #   # sonarqube_extensions:
+  #   # sonarqube_bundled-plugins:
+  #   # sonarqube_logs:
+  #   postgresql:
+  #   postgresql_data:

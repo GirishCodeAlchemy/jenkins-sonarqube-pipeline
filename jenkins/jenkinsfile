@@ -1,0 +1,27 @@
+node {
+    stage('Clone repo') {
+        git branch: "main", url:"git@github.com:GirishCodeAlchemy/TopNDiskAnalyzer.git", credentialsId: "jenkins-ssh-key"
+    }
+   stage('Build and Run SonarTest') {
+        docker.image('gradle:6.9.4-jdk11').inside('-v /var/run/docker.sock:/var/run/docker.sock --entrypoint="" --net workspace_cicd') {
+            sh 'ls -la'
+            sh "./gradlew jacocoTestReport sonarqube -Dsonar.projectKey=cc4-system -Dsonar.projectName='cc4-system' -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=sqp_dd2513c7dae6b09cacc1368072f0aa03703b4c46 -Dsonar.verbose=true"
+            // sh './gradlew clean build jacocoTestReport'
+        }
+    }
+    // stage('SonarTests') {
+    //     docker.image('sonarsource/sonar-scanner-cli').inside('-v /var/run/docker.sock:/var/run/docker.sock --entrypoint="" --net workspace_cicd') {
+    //         withCredentials([string(credentialsId: 'SONAR_GLOBAL_TOKEN', variable: 'SONAR_TOKEN')]) {
+    //             try {
+    //                 sh "ls -la /usr/local/bin"
+    //                 sh "sonar-scanner -v"
+    //                 sh "sonar-scanner -Dsonar.projectKey=cc4-system -Dsonar.projectName='cc4-system' -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=sqp_dd2513c7dae6b09cacc1368072f0aa03703b4c46 -Dsonar.verbose=true "
+                   
+    //             } catch (Exception e) {
+    //                 echo "SonarQube analysis failed"
+    //                 throw e
+    //             }
+    //         }
+    //     }
+    // }
+}
