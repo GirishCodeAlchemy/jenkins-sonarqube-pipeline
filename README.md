@@ -1,2 +1,2 @@
-# alchemy-template
-Template for github repositories
+# Jenkins Sonarqube Pipeline
+Complete setup of jenkins and sonarqube pipeline configuration using Docker
