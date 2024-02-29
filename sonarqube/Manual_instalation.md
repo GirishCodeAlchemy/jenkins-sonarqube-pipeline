@@ -623,3 +623,5 @@ $ sonar-scanner -D sonar.login=<YourLoginToken>
 
 Conclusion
 You have successfully installed and used SonarQube on your Ubuntu 22.04 server. For details, you can check out the following resources.
+
+Ref : https://docs.vultr.com/how-to-use-sonarqube-on-ubuntu-22-04-lts#5.-install-sonarqube
